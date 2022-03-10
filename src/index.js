@@ -5,6 +5,15 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import clayful from "clayful/client-js";
+import axios from "axios";
+
+const CLAYFUL_API_KEY = process.env.REACT_APP_CLAYFUL_KEY;
+clayful.config({
+  client: CLAYFUL_API_KEY,
+});
+
+clayful.install("request", require("clayful/plugins/request-axios")(axios));
 
 ReactDOM.render(
   <React.StrictMode>

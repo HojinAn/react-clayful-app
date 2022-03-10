@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import clayful from "clayful/client-js";
 import axios from "axios";
+import "./css/auth.css";
 
 const CLAYFUL_API_KEY = process.env.REACT_APP_CLAYFUL_KEY;
 clayful.config({

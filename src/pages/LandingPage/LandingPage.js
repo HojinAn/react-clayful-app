@@ -36,7 +36,7 @@ function LandingPage() {
     if (item) {
       return (
         <div key={item._id} className="grid-product">
-          <Link to={`/product/${item.id}`}>
+          <Link to={`/product/${item._id}`}>
             <img src={item.thumbnail.url} alt={item.name} />
             <div className="grid-detail">
               <p>{item.name}</p>

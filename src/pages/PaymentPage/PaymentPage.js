@@ -5,6 +5,28 @@ function PaymentPage() {
   const [cart, setCart] = useState({});
   const [paymentMethods, setPaymentMethods] = useState([]);
 
+  const [recvUserInfo, setRecvUserInfo] = useState({
+    mobile: "",
+    full: "",
+  });
+
+  const [sendUserInfo, setSendUserInfo] = useState({
+    mobile: "",
+    full: "",
+  });
+
+  const [address, setAddress] = useState({
+    postCode: "",
+    state: "",
+    city: "",
+    address1: "",
+    address2: "",
+    country: "",
+  });
+
+  const [isChecked, setIsChecked] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
+
   useEffect(() => {
     getCartData();
     getPaymentData();
@@ -44,6 +66,38 @@ function PaymentPage() {
     });
   };
 
+  const handleSendChange = (e) => {
+    const { name, value } = e.target;
+    setSendUserInfo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleRecvChange = (e) => {
+    const { name, value } = e.target;
+    setSendUserInfo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckboxClick = () => {
+    if (isChecked) {
+      setIsChecked(false);
+      setRecvUserInfo({
+        full: "",
+        mobile: "",
+      });
+    } else {
+      setIsChecked(true);
+      setRecvUserInfo({
+        full: sendUserInfo.full,
+        mobile: sendUserInfo.mobile,
+      });
+    }
+  };
+
   return (
     <div className="pageWrapper">
       <div className="payment">
@@ -62,18 +116,48 @@ function PaymentPage() {
         <div style={{ marginTop: 16, width: "100%", display: "flex" }}>
           <div style={{ width: "49%" }}>
             <h5>주문자 정보</h5>
-            <input type="text" name="full" placeholder="주문자명" />
-            <input type="text" name="mobile" placeholder="무선처연락처" />
+            <input
+              value={sendUserInfo.full}
+              onChange={handleSendChange}
+              type="text"
+              name="full"
+              placeholder="주문자명"
+            />
+            <input
+              value={sendUserInfo.mobile}
+              onChange={handleSendChange}
+              type="text"
+              name="mobile"
+              placeholder="무선처연락처"
+            />
             <div>
-              <input type="checkbox" id="sameInfo" name="sameInfo" />
+              <input
+                onChange={handleCheckboxClick}
+                checked={isChecked}
+                type="checkbox"
+                id="sameInfo"
+                name="sameInfo"
+              />
               <label htmlFor="sameInfo">수취자 정보도 위와 동일합니다.</label>
             </div>
           </div>
           <div style={{ width: "2%" }} />
           <div style={{ width: "49%" }}>
             <h5>수취자 정보</h5>
-            <input type="text" name="full" placeholder="수취자명" />
-            <input type="text" name="mobile" placeholder="무선처연락처" />
+            <input
+              value={recvUserInfo.full}
+              onChange={handleRecvChange}
+              type="text"
+              name="full"
+              placeholder="수취자명"
+            />
+            <input
+              value={recvUserInfo.mobile}
+              onChange={handleRecvChange}
+              type="text"
+              name="mobile"
+              placeholder="무선처연락처"
+            />
 
             <h5>배송 정보</h5>
             <input type="text" readOnly placeholder="주소" />

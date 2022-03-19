@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import clayful from "clayful/client-js";
 import "./PaymentPage.css";
 import { useNavigate } from "react-router-dom";
+import PostCodeModal from "../../components/PostCodeModal";
+
 function PaymentPage() {
   const navigate = useNavigate();
   const [cart, setCart] = useState({});
@@ -26,13 +28,13 @@ function PaymentPage() {
     country: "",
   });
 
+  const [show, setShow] = useState(false);
+
   const [isChecked, setIsChecked] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
-
   let options = {
     customer: localStorage.getItem("accessToken"),
   };
-
   let Cart = clayful.Cart;
 
   useEffect(() => {
@@ -40,9 +42,11 @@ function PaymentPage() {
     getPaymentData();
   }, []);
 
-  const getPaymentData = () => {
-    var PaymentMethod = clayful.PaymentMethod;
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
+  const getPaymentData = () => {
+    let PaymentMethod = clayful.PaymentMethod;
     PaymentMethod.list({}, function (err, result) {
       if (err) {
         // Error case
@@ -116,14 +120,13 @@ function PaymentPage() {
         return;
       }
 
-      let headers = result.headers;
       let data = result.data;
 
       console.log(data);
 
       let items = [];
 
-      cart.itms.map((item) => {
+      cart.items.map((item) => {
         let itemVariable = {};
         itemVariable.bundleItems = item.bundleItems;
         itemVariable.product = item.product._id;
@@ -175,7 +178,7 @@ function PaymentPage() {
           return;
         }
 
-        var data = result.data;
+        let data = result.data;
 
         console.log(data);
 
@@ -193,6 +196,36 @@ function PaymentPage() {
         });
       });
     });
+  };
+
+  const handleCompletePostCode = (data) => {
+    let fullAddress = data.address;
+    let extraAddress = "";
+    if (data.addressType === "R") {
+      if (data.bname !== "") {
+        extraAddress += data.bname;
+      }
+      if (data.buildingName !== "") {
+        extraAddress +=
+          extraAddress !== "" ? `, ${data.buildingName}` : data.buildingName;
+      }
+      fullAddress += extraAddress !== "" ? ` (${extraAddress})` : "";
+    }
+    handleClose();
+    setAddress((prevState) => ({
+      ...prevState,
+      postCode: data.zonecode,
+      state: data.side,
+      city: data.sigungu,
+      address1: fullAddress,
+    }));
+  };
+
+  const handleAddress2Change = (e) => {
+    setAddress((prevState) => ({
+      ...prevState,
+      address2: e.target.value,
+    }));
   };
 
   return (
@@ -253,13 +286,25 @@ function PaymentPage() {
               onChange={handleRecvChange}
               type="text"
               name="mobile"
-              placeholder="무선처연락처"
+              placeholder="무선 연락처"
             />
 
             <h5>배송 정보</h5>
-            <input type="text" readOnly placeholder="주소" />
-            <input type="text" name="address2" placeholder="상세 주소" />
-            <input type="text" readOnly placeholder="우편번호" />
+            <input
+              type="text"
+              readOnly
+              value={address.address1}
+              placeholder="주소"
+              onClick={handleShow}
+            />
+            <input
+              type="text"
+              value={address.address2}
+              onChange={handleAddress2Change}
+              name="address2"
+              placeholder="상세 주소"
+            />
+            <input type="text" value={address.postCode} readOnly placeholder="우편번호" />
 
             <h5>결제</h5>
             <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
@@ -275,6 +320,11 @@ function PaymentPage() {
               주문
             </button>
             {paymentMethod === "bank-transfer" && <p>계좌번호: 1111-1111 클레이풀 은행</p>}
+            <PostCodeModal
+              show={show}
+              handleClose={handleClose}
+              handleCompletePostCode={handleCompletePostCode}
+            />
           </div>
         </div>
       </div>

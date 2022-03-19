@@ -27,6 +27,30 @@ function CartPage() {
     });
   }, []);
 
+  const buttonHandler = (type, index) => {
+    console.log("cart", { ...cart });
+    let newCart = { ...cart };
+    if (type === "plus") {
+      // 해당 아이템 가격 변동
+      newCart.items[index].price.original.raw +=
+        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      // 전체 아이템 가격 변경
+      newCart.total.amount.raw +=
+        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      // 해당 아이템 개수 변경
+      newCart.items[index].quantity.raw += 1;
+    } else {
+      if (newCart.items[index].quantity.raw === 1) return;
+      newCart.items[index].price.original.raw -=
+        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      newCart.total.amount.raw -=
+        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      newCart.items[index].quantity.raw -= 1;
+    }
+
+    setCart(newCart);
+  };
+
   const items = cart.items;
 
   return (
@@ -36,7 +60,14 @@ function CartPage() {
         <div className="shopping-cart-body" style={{ minHeight: 100 }}>
           {items && items.length > 0 ? (
             items.map((item, index) => {
-              return <CartItem key={item._id} item={item} index={index} />;
+              return (
+                <CartItem
+                  key={item._id}
+                  item={item}
+                  index={index}
+                  buttonHandler={(type, index) => buttonHandler(type, index)}
+                />
+              );
             })
           ) : (
             <p style={{ textAlign: "center", marginTop: "2rem" }}>카트에 상품이 하나도 없습니다.</p>

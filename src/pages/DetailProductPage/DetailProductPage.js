@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import clayful from "clayful/client-js";
 import { Row, Col } from "react-bootstrap";
+import ProductInfo from "./Sections/ProductInfo";
 function DetailProductPage() {
   const params = useParams();
   const productId = params.productId;
@@ -20,7 +21,7 @@ function DetailProductPage() {
 
       let data = result.data;
 
-      console.log(data);
+      // console.log(data);
       setItem(data);
     });
   }, []);
@@ -29,10 +30,12 @@ function DetailProductPage() {
       <Row>
         <Col md>
           <div>
-            <img src={item.thumbnail?.url} alt={item.name} />
+            <img style={{ width: "100%" }} src={item.thumbnail?.url} alt={item.name} />
           </div>
         </Col>
-        <Col md></Col>
+        <Col md>
+          <ProductInfo detail={item} />
+        </Col>
       </Row>
       <div dangerouslySetInnerHTML={{ __html: item.description }} />
     </div>

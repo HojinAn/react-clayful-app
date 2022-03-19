@@ -63,8 +63,28 @@ function CartPage() {
     setCart(newCart);
   };
 
-  const items = cart.items;
+  const removeItemFromState = (itemId, price) => {
+    let newCart = { ...cart };
+    let filteredItems = newCart.items.filter((item) => item._id !== itemId);
+    newCart.items = filteredItems;
 
+    newCart.total.amount.raw -= price;
+    setCart(newCart);
+  };
+
+  const deleteItemHandler = (itemId, price) => {
+    Cart.deleteItemForMe(itemId, options, function (err, result) {
+      if (err) {
+        // Error case
+        console.log(err.code);
+        return;
+      }
+
+      removeItemFromState(itemId, price);
+    });
+  };
+
+  const items = cart.items;
   return (
     <div className="pageWrapper">
       <div className="shopping-cart">
@@ -77,6 +97,7 @@ function CartPage() {
                   key={item._id}
                   item={item}
                   index={index}
+                  deleteItemHandler={(itemId, price) => deleteItemHandler(itemId, price)}
                   buttonHandler={(type, index) => buttonHandler(type, index)}
                 />
               );
@@ -91,7 +112,7 @@ function CartPage() {
             <button
               style={{ float: "right", padding: "4px 8px" }}
               onClick={() => navigate("/payment")}
-            ></button>
+            >결제</button>
           </div>
         )}
       </div>

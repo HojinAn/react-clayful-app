@@ -8,13 +8,13 @@ function CartPage() {
   const navigate = useNavigate();
   const [cart, setCart] = useState({});
 
+  let Cart = clayful.Cart;
+
+  let options = {
+    customer: localStorage.getItem("accessToken"),
+  };
+
   useEffect(() => {
-    let Cart = clayful.Cart;
-
-    let options = {
-      customer: localStorage.getItem("accessToken"),
-    };
-
     Cart.getForMe({}, options, function (err, result) {
       if (err) {
         // Error case
@@ -27,27 +27,39 @@ function CartPage() {
     });
   }, []);
 
+  const updateItemData = (itemId, quantity) => {
+    var payload = {
+      quantity,
+    };
+
+    Cart.updateItemForMe(itemId, payload, options, function (err, result) {
+      if (err) {
+        // Error case
+        console.log(err.code);
+        return;
+      }
+    });
+  };
+
   const buttonHandler = (type, index) => {
     console.log("cart", { ...cart });
     let newCart = { ...cart };
     if (type === "plus") {
+      const price = cart.items[index].price.original.raw / cart.items[index].quantity.raw;
       // 해당 아이템 가격 변동
-      newCart.items[index].price.original.raw +=
-        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      newCart.items[index].price.original.raw += price;
       // 전체 아이템 가격 변경
-      newCart.total.amount.raw +=
-        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      newCart.total.amount.raw += price;
       // 해당 아이템 개수 변경
       newCart.items[index].quantity.raw += 1;
     } else {
       if (newCart.items[index].quantity.raw === 1) return;
-      newCart.items[index].price.original.raw -=
-        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
-      newCart.total.amount.raw -=
-        cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      const price = cart.items[index].price.original.raw / cart.items[index].quantity.raw;
+      newCart.items[index].price.original.raw -= price;
+      newCart.total.amount.raw -= price;
       newCart.items[index].quantity.raw -= 1;
     }
-
+    updateItemData(newCart.items[index]._id, newCart.items[index].quantity.raw);
     setCart(newCart);
   };
 

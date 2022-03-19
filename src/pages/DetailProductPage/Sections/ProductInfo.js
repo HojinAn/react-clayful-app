@@ -5,6 +5,14 @@ function ProductInfo(/*props*/ { detail }) {
   // console.log(props.detail)기
   // console.log("detail", detail);
   const [count, setCount] = useState(1);
+  const handleQuantityClick = (type) => {
+    if (type === "plus") {
+      setCount((prev) => prev + 1);
+    } else {
+      if (count === 1) return;
+      setCount((prev) => prev - 1);
+    }
+  };
   return (
     <div>
       <p style={{ color: "#bf4800", marginBottom: 0 }}>New</p>
@@ -14,11 +22,21 @@ function ProductInfo(/*props*/ { detail }) {
       </h5>
       <div className="quantity">
         <p style={{ fontWeight: 600, marginBottom: 5 }}>수량</p>
-        <button className="plus-btn" type="button" name="button">
+        <button
+          onClick={() => handleQuantityClick("plus")}
+          className="plus-btn"
+          type="button"
+          name="button"
+        >
           +
         </button>
         <input type="text" readOnly name="number" value={count} />
-        <button className="minus-btn" type="button" name="button">
+        <button
+          onClick={() => handleQuantityClick("minus")}
+          className="minus-btn"
+          type="button"
+          name="button"
+        >
           -
         </button>
         <br />

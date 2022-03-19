@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import "./ProductInfo.css";
 import clayful from "clayful/client-js";
-import { Alert } from 'react-bootstrap';
+import { Alert } from "react-bootstrap";
 
 function ProductInfo({ detail }) {
   const navigate = useNavigate();
@@ -47,11 +47,16 @@ function ProductInfo({ detail }) {
         console.log(err.code);
         return;
       }
-
-      setShow(true);
-      setTimeout(() => {
-        setShow(false);
-      }, 3000);
+      if (type === "cart") {
+        setShow(true);
+        setTimeout(() => {
+          setShow(false);
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          navigate("/user/cart");
+        }, 1000);
+      }
     });
   };
 
@@ -90,10 +95,12 @@ function ProductInfo({ detail }) {
         <br />
         <h3>총 상품 금액: {detail.price?.original.raw * count}원</h3>
         <br />
-        <div className="product-info-action" onClick={() => handleActionClick("cart")}>
+        <div onClick={() => handleActionClick("cart")} className="product-info-action">
           장바구니에 담기
         </div>
-        <div className="product-info-action">바로 구매</div>
+        <div onClick={() => handleActionClick("pay")} className="product-info-action">
+          바로 구매
+        </div>
       </div>
     </div>
   );

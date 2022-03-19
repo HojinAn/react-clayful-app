@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import clayful from "clayful/client-js";
 import "./PaymentPage.css";
+import { useNavigate } from "react-router-dom";
 function PaymentPage() {
+  const navigate = useNavigate();
   const [cart, setCart] = useState({});
   const [paymentMethods, setPaymentMethods] = useState([]);
 
@@ -27,6 +29,12 @@ function PaymentPage() {
   const [isChecked, setIsChecked] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
 
+  let options = {
+    customer: localStorage.getItem("accessToken"),
+  };
+
+  let Cart = clayful.Cart;
+
   useEffect(() => {
     getCartData();
     getPaymentData();
@@ -48,12 +56,6 @@ function PaymentPage() {
   };
 
   const getCartData = () => {
-    let Cart = clayful.Cart;
-
-    let options = {
-      customer: localStorage.getItem("accessToken"),
-    };
-
     Cart.getForMe({}, options, function (err, result) {
       if (err) {
         // Error case
@@ -96,6 +98,101 @@ function PaymentPage() {
         mobile: sendUserInfo.mobile,
       });
     }
+  };
+
+  const handleCompletePaymentClick = () => {
+    let Customer = clayful.Customer;
+    const body = {
+      name: {
+        full: sendUserInfo.full,
+      },
+      mobile: sendUserInfo.mobile,
+    };
+
+    Customer.updateMe(body, options, function (err, result) {
+      if (err) {
+        // Error case
+        console.log(err.code);
+        return;
+      }
+
+      let headers = result.headers;
+      let data = result.data;
+
+      console.log(data);
+
+      let items = [];
+
+      cart.itms.map((item) => {
+        let itemVariable = {};
+        itemVariable.bundleItems = item.bundleItems;
+        itemVariable.product = item.product._id;
+        itemVariable.quantity = item.quantity.raw;
+        itemVariable.shippingMethod = item.shippingMethod._id;
+        itemVariable.variant = item.variant._id;
+        itemVariable._id = item._id;
+        return items.push(itemVariable);
+      });
+
+      let payload = {
+        items,
+        currency: cart.currency.payment.code,
+        paymentMethod,
+        address: {
+          shipping: {
+            name: {
+              full: recvUserInfo.full,
+            },
+            mobile: recvUserInfo.mobile,
+            phone: recvUserInfo.phone,
+            postcode: address.postCode,
+            state: address.state,
+            city: address.city,
+            address1: address.address1,
+            address2: address.address2,
+            country: "KR",
+          },
+          billing: {
+            name: {
+              full: recvUserInfo.full,
+            },
+            mobile: recvUserInfo.mobile,
+            phone: recvUserInfo.phone,
+            postcode: address.postCode,
+            state: address.state,
+            city: address.city,
+            address1: address.address1,
+            address2: address.address2,
+            country: "KR",
+          },
+        },
+      };
+
+      Cart.checkoutForMe("order", payload, options, function (err, result) {
+        if (err) {
+          // Error case
+          console.log(err.code);
+          return;
+        }
+
+        var data = result.data;
+
+        console.log(data);
+
+        Cart.emptyForMe(options, function (err, result) {
+          if (err) {
+            // Error case
+            console.log(err.code);
+            return;
+          }
+
+          var data = result.data;
+
+          console.log(data);
+          navigate("/history");
+        });
+      });
+    });
   };
 
   return (
@@ -174,7 +271,9 @@ function PaymentPage() {
               ))}
             </select>
 
-            <button style={{ width: "100%", marginTop: 10 }}>주문</button>
+            <button onClick={handleCompletePaymentClick} style={{ width: "100%", marginTop: 10 }}>
+              주문
+            </button>
             {paymentMethod === "bank-transfer" && <p>계좌번호: 1111-1111 클레이풀 은행</p>}
           </div>
         </div>
